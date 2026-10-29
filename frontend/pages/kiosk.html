@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TrueShift Kiosk</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/main.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+  <style>
+    body.kiosk-body {
+      background: var(--color-navy);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .kiosk-header {
+      padding: 32px 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .kiosk-brand {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 2rem;
+      font-weight: 700;
+    }
+    .kiosk-time-wrap {
+      text-align: right;
+    }
+    .kiosk-time {
+      font-family: monospace;
+      font-size: 3rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+    .kiosk-date {
+      font-size: 1.2rem;
+      color: #A9B2C6;
+    }
+    .kiosk-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .kiosk-mode-toggle {
+      display: flex;
+      background: rgba(255,255,255,0.1);
+      border-radius: 30px;
+      padding: 4px;
+      margin-bottom: 32px;
+    }
+    .kiosk-mode-btn {
+      padding: 12px 32px;
+      border-radius: 26px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #A9B2C6;
+      background: transparent;
+      transition: all 0.2s;
+    }
+    .kiosk-mode-btn.active {
+      background: var(--color-accent-blue);
+      color: #fff;
+    }
+    .kiosk-camera-wrap {
+      width: 600px;
+      height: 450px;
+      background: #000;
+      border-radius: var(--radius-lg);
+      border: 4px solid rgba(255,255,255,0.1);
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    }
+    .kiosk-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1); /* mirror */
+    }
+    .qr-overlay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 200px;
+      height: 200px;
+      border: 2px dashed rgba(255,255,255,0.5);
+      border-radius: 20px;
+      box-shadow: 0 0 0 4000px rgba(0,0,0,0.4);
+      pointer-events: none;
+    }
+    .kiosk-msg {
+      margin-top: 24px;
+      font-size: 1.4rem;
+      color: #C7CEDD;
+      text-align: center;
+    }
+    .kiosk-result-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(31, 122, 77, 0.95);
+      color: #fff;
+      z-index: 10;
+      border-radius: var(--radius-lg);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .kiosk-result-overlay.show {
+      opacity: 1;
+    }
+    .kiosk-result-overlay.error {
+      background: rgba(192, 71, 59, 0.95);
+    }
+    .staff-login-link {
+      position: absolute;
+      bottom: 24px;
+      right: 24px;
+      color: rgba(255,255,255,0.3);
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    .staff-login-link:hover { color: #fff; }
+    
+    /* Setup Screen */
+    .kiosk-setup {
+      position: absolute;
+      inset: 0;
+      background: var(--color-surface);
+      color: var(--color-ink);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+  </style>
+</head>
+<body class="kiosk-body">
+
+<!-- Setup Screen (shown if not auth'd as kiosk) -->
+<div class="kiosk-setup" id="kiosk-setup">
+  <div style="width: 400px; text-align: center;">
+    <h2 style="margin-bottom: 8px;">Kiosk Setup</h2>
+    <p style="color:var(--color-ink-soft); margin-bottom: 24px;">Please login with an Admin or HR account to authorize this kiosk.</p>
+    <div id="setup-alert" class="alert alert-error hidden"></div>
+    <form id="setup-form">
+      <div class="field" style="text-align: left;">
+        <label>Work Email</label>
+        <input type="email" id="setup-email" required />
+      </div>
+      <div class="field" style="text-align: left;">
+        <label>Password</label>
+        <input type="password" id="setup-password" required />
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">Authorize Kiosk</button>
+    </form>
+    <a href="login.html" style="display:block; margin-top:24px; color:var(--color-accent-blue);">Back to standard login</a>
+  </div>
+</div>
+
+<!-- Main Kiosk UI -->
+<div id="kiosk-ui" class="hidden" style="display: flex; flex-direction: column; height: 100%;">
+  <header class="kiosk-header">
+    <div class="kiosk-brand">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none"><path d="M4 20V10M12 20V4M20 20V14" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/></svg>
+      TrueShift Kiosk
+    </div>
+    <div class="kiosk-time-wrap">
+      <div class="kiosk-time" id="kiosk-time">--:--:--</div>
+      <div class="kiosk-date" id="kiosk-date">Loading...</div>
+    </div>
+  </header>
+
+  <main class="kiosk-main">
+    <div class="kiosk-mode-toggle">
+      <button class="kiosk-mode-btn active" id="btn-mode-qr" onclick="switchMode('qr')">QR Scan</button>
+      <button class="kiosk-mode-btn" id="btn-mode-face" onclick="switchMode('face')">Face Check-in</button>
+    </div>
+
+    <div class="kiosk-camera-wrap">
+      <video id="kiosk-video" class="kiosk-video" autoplay playsinline muted></video>
+      <div class="qr-overlay" id="qr-overlay"></div>
+      
+      <div class="kiosk-result-overlay" id="result-overlay">
+        <svg id="result-icon-success" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-bottom:16px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+        <svg id="result-icon-error" class="hidden" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-bottom:16px;"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+        <h2 id="result-title" style="margin-bottom:8px; font-size:2rem;">Success</h2>
+        <p id="result-msg" style="font-size:1.2rem; opacity:0.9;">Checked in at 09:00 AM</p>
+      </div>
+    </div>
+
+    <div class="kiosk-msg" id="kiosk-msg">Hold your employee QR badge up to the camera</div>
+    
+    <!-- Hidden input for state -->
+    <input type="hidden" id="emp-id-hidden" value="" />
+  </main>
+  
+  <a href="#" id="staff-logout" class="staff-login-link">Exit Kiosk Mode</a>
+</div>
+
+<script src="../js/api.js"></script>
+<script src="../js/utils.js"></script>
+<script src="../js/kiosk.js"></script>
+</body>
+</html>

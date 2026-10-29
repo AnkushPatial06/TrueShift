@@ -1,0 +1,90 @@
+.portal-topbar {
+  background: var(--color-navy);
+  color: #fff;
+  padding: 18px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.portal-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+.portal-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.portal-avatar {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: var(--color-accent-blue);
+  color: #fff; display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 0.82rem;
+}
+
+.portal-body {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+}
+
+.portal-greeting {
+  margin-bottom: 28px;
+}
+
+.portal-greeting h1 {
+  font-size: 2rem;
+  margin-bottom: 6px;
+}
+
+.portal-greeting p {
+  color: var(--color-ink-soft);
+}
+
+.portal-quick-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.portal-action-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 22px;
+  text-decoration: none;
+  color: var(--color-ink);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.portal-action-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-card);
+}
+
+.portal-action-icon {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  background: var(--color-accent-blue-soft);
+  color: var(--color-accent-blue);
+  display: flex; align-items: center; justify-content: center;
+}
+
+.portal-action-title { font-weight: 700; font-size: 1rem; }
+.portal-action-sub { font-size: 0.85rem; color: var(--color-ink-soft); }
+
+.portal-section-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+}

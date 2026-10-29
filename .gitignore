@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+.env
+backend/.env
+.DS_Store
+node_modules/
+backend/ml_models/*.pkl
+backend/ml_models/*.onnx
+*.log
+commands.txt

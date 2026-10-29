@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Leave Management · TrueShift</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script>
+  (function(){
+    try {
+      var s = localStorage.getItem('trueshift_theme_pref') || 'light';
+      var r = s === 'system' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : s;
+      document.documentElement.setAttribute('data-theme', r);
+    } catch(e){}
+  })();
+</script>
+<link rel="stylesheet" href="../css/main.css?v=20261029.1" />
+<link rel="stylesheet" href="../css/forms.css?v=20261029.1" />
+<link rel="stylesheet" href="../css/components.css?v=20261029.1" />
+<style>
+  .leave-heading { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:20px; }
+  .leave-heading h2 { margin:0; }
+  #leave-balances { grid-template-columns:repeat(auto-fit, minmax(min(100%, 235px), 1fr)); align-items:stretch; gap:16px; }
+  #leave-balances .kpi-card { min-width:0; min-height:150px; justify-content:space-between; padding:20px; }
+  #leave-balances .kpi-header { gap:12px; align-items:flex-start; }
+  #leave-balances .kpi-header > div:first-child { min-width:0; }
+  #leave-balances .kpi-value { line-height:1.1; }
+  #leave-balances .kpi-icon { flex:0 0 44px; }
+  @media (max-width:600px) {
+    .leave-heading { align-items:flex-start; flex-direction:column; }
+    .leave-heading .btn { width:100%; }
+    #leave-balances { grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+    #leave-balances .kpi-card { min-height:132px; padding:15px; }
+  }
+  @media (max-width:380px) { #leave-balances { grid-template-columns:minmax(0,1fr); } }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+  <aside id="app-sidebar" class="sidebar"></aside>
+  <div class="main-area">
+    <header class="topbar">
+      <button class="hamburger-btn" id="hamburger-btn" onclick="document.getElementById('app-sidebar').classList.toggle('open')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <h1 class="topbar-title">Leave Management</h1>
+      <div class="topbar-right">
+        <div class="theme-toggle-slot" data-theme-switcher></div>
+        <div class="notif-bell-wrapper" id="notif-bell-wrapper">
+          <button class="icon-btn" id="notif-bell-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span class="notif-badge hidden" id="notif-badge">0</span></button>
+        </div>
+        <div class="topbar-avatar" id="topbar-avatar">--</div>
+      </div>
+    </header>
+    <main class="page-content">
+
+      <div class="leave-heading">
+        <h2>My Leave Balance</h2>
+        <button class="btn btn-primary" onclick="Modal.open('apply-leave-modal')">+ Apply for Leave</button>
+      </div>
+
+      <div class="kpi-grid" id="leave-balances" style="margin-bottom:28px;">
+        <!-- populated by js -->
+      </div>
+
+      <div class="card" style="margin-bottom: 24px;">
+        <h3 class="section-title">My Leave History</h3>
+        <div id="my-leaves-table"></div>
+      </div>
+
+      <div id="team-leaves-section" class="card hidden">
+        <h3 class="section-title">Pending Approvals</h3>
+        <div id="team-leaves-table"></div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- Apply Leave Modal -->
+<div id="apply-leave-modal" class="modal-backdrop">
+  <div class="modal" style="max-width:480px;" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-title">Apply for Leave</div>
+      <button class="modal-close" onclick="Modal.close('apply-leave-modal')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <form id="apply-leave-form">
+      <div class="form-group" style="margin-bottom:16px;">
+        <label style="display:block; font-size:0.85rem; font-weight:600; margin-bottom:6px;">Leave Type</label>
+        <select id="leave-type" required style="width:100%; padding:10px 12px; border:1px solid var(--color-border); border-radius:var(--radius-sm); font-family:var(--font-body); font-size:0.9rem;">
+          <option value="casual">Casual Leave (12 days/year)</option>
+          <option value="sick">Sick Leave (10 days/year)</option>
+          <option value="earned">Earned Leave (15 days/year)</option>
+          <option value="emergency">Emergency Leave (5 days/year)</option>
+          <option value="unpaid">Unpaid Leave</option>
+        </select>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+        <div>
+          <label style="display:block; font-size:0.85rem; font-weight:600; margin-bottom:6px;">Start Date</label>
+          <input type="date" id="leave-start" required style="width:100%; padding:10px 12px; border:1px solid var(--color-border); border-radius:var(--radius-sm); font-family:var(--font-body);" />
+        </div>
+        <div>
+          <label style="display:block; font-size:0.85rem; font-weight:600; margin-bottom:6px;">End Date</label>
+          <input type="date" id="leave-end" required style="width:100%; padding:10px 12px; border:1px solid var(--color-border); border-radius:var(--radius-sm); font-family:var(--font-body);" />
+        </div>
+      </div>
+      <div style="color:var(--color-ink-soft); font-size:0.85rem; margin-bottom:16px; background:var(--color-bg); padding:8px 12px; border-radius:6px;" id="leave-days-calc">Select dates to calculate days</div>
+      <div style="margin-bottom:20px;">
+        <label style="display:block; font-size:0.85rem; font-weight:600; margin-bottom:6px;">Reason <span style="color:var(--color-ink-soft); font-weight:400;">(required)</span></label>
+        <textarea id="leave-reason" required rows="3" placeholder="Briefly describe the reason for your leave..." style="width:100%; padding:10px 12px; border:1px solid var(--color-border); border-radius:var(--radius-sm); font-family:var(--font-body); resize:vertical;"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="Modal.close('apply-leave-modal')">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="btn-submit-leave">Submit Application</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="../js/api.js?v=20261029.1"></script>
+<script src="../js/utils.js?v=20261029.1"></script>
+<script src="../js/components/toast.js?v=20261029.1"></script>
+<script src="../js/components/modal.js?v=20261029.1"></script>
+<script src="../js/components/skeleton.js?v=20261029.1"></script>
+<script src="../js/components/table.js?v=20261029.1"></script>
+<script src="../js/components/sidebar.js?v=20261029.1"></script>
+<script src="../js/components/notification-center.js?v=20261029.1"></script>
+<script src="../js/theme.js?v=20261029.1"></script>
+<script src="../js/leaves.js?v=20261029.1"></script>
+</body>
+</html>

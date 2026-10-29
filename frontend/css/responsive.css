@@ -1,0 +1,6 @@
+/* Extra breakpoints beyond what's inlined in main.css / forms.css */
+@media (max-width: 640px) {
+  .main-content { padding: 20px; }
+  .topbar h1 { font-size: 1.4rem; }
+  .stat-value { font-size: 1.9rem; }
+}

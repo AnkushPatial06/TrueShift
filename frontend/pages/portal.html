@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>TrueShift Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script>
+  (function(){
+    try {
+      var s = localStorage.getItem('trueshift_theme') || localStorage.getItem('trueshift_theme_pref') || 'light';
+      var r = s === 'system' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : s;
+      document.documentElement.setAttribute('data-theme', r);
+      document.documentElement.style.colorScheme = r;
+    } catch(e){}
+  })();
+</script>
+<link rel="stylesheet" href="../css/main.css" />
+<link rel="stylesheet" href="../css/components.css" />
+<link rel="stylesheet" href="../css/portal-mobile.css" />
+</head>
+<body>
+
+<div class="app-shell portal-shell">
+  <!-- Desktop Sidebar -->
+  <aside id="app-sidebar" class="sidebar"></aside>
+
+  <!-- Main Area -->
+  <div class="main-area">
+    <div class="mobile-app-wrapper">
+      
+      <!-- Top Header (Mobile only) -->
+      <header class="app-header mobile-only">
+        <div class="brand-area">
+          <div class="brand-logo">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 20V10M12 20V4M20 20V14" stroke="#000" stroke-width="2.5" stroke-linecap="round"/></svg>
+          </div>
+          <div class="brand-text">TrueShift <span>Dashboard</span></div>
+        </div>
+        <div class="header-actions">
+          <div class="theme-toggle-slot" data-theme-switcher></div>
+          <div class="bell-icon" id="notif-bell-btn-mobile">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" stroke-linecap="round"/></svg>
+            <div class="bell-dot"></div>
+          </div>
+          <div class="avatar" id="portal-avatar-mobile">--<div class="avatar-dot"></div></div>
+        </div>
+      </header>
+
+      <!-- Desktop Topbar (Hidden on mobile) -->
+      <header class="topbar desktop-only" style="background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-md); padding:12px 28px; margin-bottom: 20px;">
+        <button class="hamburger-btn" id="hamburger-btn" onclick="document.getElementById('app-sidebar').classList.toggle('open')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+        <div style="display:flex; align-items:center; gap:8px; background:var(--color-surface-alt); border:1px solid var(--color-border); padding:6px 12px; border-radius:16px; font-size:12px; font-weight:600; color:var(--color-ink-soft);">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Local time: <span id="desktop-clock">--:--:--</span>
+        </div>
+        <div class="topbar-right">
+          <div class="theme-toggle-slot" data-theme-switcher></div>
+          <div class="notif-bell-wrapper" id="notif-bell-wrapper">
+            <button class="icon-btn" id="notif-bell-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span class="notif-badge hidden" id="notif-badge">0</span></button>
+          </div>
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div class="topbar-avatar" id="topbar-avatar">--</div>
+            <div style="line-height:1.2;">
+              <div style="font-weight:600; font-size:14px; color:var(--color-ink);" id="topbar-name">Loading...</div>
+              <div style="font-size:11px; color:var(--color-ink-soft);" id="topbar-role">Employee</div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="app-main">
+        <!-- Hero Section -->
+        <div class="card hero-card">
+          <div class="hero-left">
+            <h1 class="greeting-title" style="font-size:32px; margin-bottom:16px;"><span id="greeting-text">Good afternoon</span>, <span id="greeting-name">there</span> 👋</h1>
+            <div class="pill-row" style="justify-content:flex-start; gap:12px; margin-bottom:12px;" id="hero-pills">
+              <div class="pill" id="hero-pill-status" style="background:#DBEAFE; color:#1E3A8A;"><span class="dot" style="background:#3B82F6; width:6px; height:6px; border-radius:50%; display:inline-block; margin-right:4px;"></span> Loading attendance status…</div>
+              <div class="pill" id="hero-pill-location" style="background:#F1F5F9; color:#475569;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;"><path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/><circle cx="12" cy="10" r="3"/></svg> Loading work location…</div>
+            </div>
+            <div class="greeting-date" style="font-size:13px;">
+              <span id="current-date-text">Loading date…</span>
+              <span style="color:#D1D5DB;">•</span>
+              <span id="shift-location">Loading work location…</span>
+            </div>
+            <div class="greeting-date" style="font-size:13px; margin-top:6px; color:#64748B;">
+              Assigned Shift: <span id="shift-time-range">Loading shift…</span>
+            </div>
+          </div>
+          <div class="hero-right hero-btn-group">
+            <button class="btn-outline" onclick="window.location.href='shifts.html'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 1l4 4-4 4M7 23l-4-4 4-4"/><path d="M21 5H9a4 4 0 0 0-4 4v1M3 19h12a4 4 0 0 0 4-4v-1"/></svg> Shift Swap</button>
+            <button class="btn-outline" onclick="window.location.href='reports.html'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Export Timesheet</button>
+            <button class="btn-dark" onclick="window.location.href='attendance.html'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Attendance</button>
+          </div>
+        </div>
+
+        <!-- ROW 1 -->
+        <div class="bento-row row-1">
+          <!-- Check In Card -->
+          <div class="bento-col">
+            <div class="card checkin-card" id="today-main-card">
+              <div class="pill-row">
+                <div style="font-size:10px; font-weight:700; color:#64748B; text-transform:uppercase; display:flex; align-items:center; gap:6px;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                  Attendance status
+                </div>
+                <div class="pill gray red-dot" id="status-pill-1">Not checked in yet</div>
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:flex-end;">
+                <div class="time-huge" style="flex-direction:column; gap:0; font-size:48px;" id="live-time">
+                  <div>--:--:--</div>
+                  <div style="font-size:24px;">AM</div>
+                </div>
+                <div style="font-size:11px; font-weight:600; color:#64748B; display:flex; align-items:center; gap:6px; margin-bottom:8px;">
+                  <span class="dot" style="background:#10B981; width:6px; height:6px; border-radius:50%; display:inline-block;"></span> Application time
+                </div>
+              </div>
+              <div class="location-text" id="checkin-boundary" style="margin-top:16px;">Loading attendance status…</div>
+              
+              <div style="background:#F8FAFC; border:1px solid #E2E8F0; padding:12px; border-radius:8px; display:flex; align-items:center; gap:8px; font-size:11px; font-weight:600; color:#475569; margin-bottom:16px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+                Check-in verification is available from the Attendance page.
+              </div>
+
+              <button class="btn-black" id="action-btn" onclick="window.location.href='attendance.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 0 0-10 10 10 10 0 0 0 10 10 10 10 0 0 0 10-10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/><path d="M12 6v6l4 2"/></svg>
+                Go to Check-In &rarr;
+              </button>
+              
+
+            </div>
+          </div>
+          
+          <!-- Telemetry -->
+          <div class="bento-col">
+            <div class="telemetry-grid">
+              <div class="t-card">
+                <div class="t-head"><span>ATTENDANCE RATE</span><div class="hub-icon" style="width:28px;height:28px;margin:0;background:#E0E7FF;color:#4F46E5;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div></div>
+                <div class="t-val" id="stat-attendance-rate">—</div>
+                <div class="t-sub text-gray" style="display:flex; justify-content:space-between; margin-top:auto;">
+                  <span>Based on recorded work days</span>
+                  <span style="color:#0B1830; font-weight:600;">Last 30 records</span>
+                </div>
+              </div>
+              <div class="t-card">
+                <div class="t-head"><span>LATE ARRIVALS</span><div class="hub-icon" style="width:28px;height:28px;margin:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div></div>
+                <div class="t-val" id="stat-late-count">—</div>
+                <div class="t-sub text-gray" style="display:flex; justify-content:space-between; margin-top:auto;">
+                  <span>In the last 30 attendance records</span>
+                </div>
+              </div>
+              <div class="t-card">
+                <div class="t-head"><span>DAYS PRESENT</span><div class="hub-icon" style="width:28px;height:28px;margin:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div></div>
+                <div class="t-val" id="stat-days-present">—</div>
+                <div class="t-sub text-gray" style="display:flex; justify-content:space-between; margin-top:auto;">
+                  <span>Absent records</span>
+                  <span id="stat-absent-count" style="color:#64748B; font-weight:600;">—</span>
+                </div>
+              </div>
+              <div class="t-card">
+                <div class="t-head"><span>ON-TIME ARRIVAL</span><div class="hub-icon" style="width:28px;height:28px;margin:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div></div>
+                <div class="t-val" id="stat-ontime">—</div>
+                <div class="t-sub text-gray" style="display:flex; justify-content:space-between; margin-top:auto;">
+                  <span>Average entry timestamp</span>
+                  <span id="stat-average-entry" style="color:#0B1830; font-weight:600;">—</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ROW 2 -->
+        <div class="bento-row row-2">
+          <!-- 30-Day Activity Matrix -->
+          <div class="bento-col">
+            <div class="card matrix-card" style="height:100%;">
+              <div class="section-title-row" style="margin-bottom:4px;">
+                <h2 style="font-size:18px;">30-Day Activity Matrix</h2>
+                <a href="analytics.html" style="color:#3B82F6; font-weight:600; text-decoration:none;">View Detailed Breakdown &rarr;</a>
+              </div>
+              <div class="matrix-subtitle" id="matrix-subtitle" style="margin-bottom:24px;">Loading attendance history…</div>
+              
+              <div style="display:flex; justify-content:space-between; font-size:10px; font-weight:600; color:#94A3B8; margin-bottom:8px; padding:0 12px;">
+                <span>W1</span><span>W2</span><span>W3</span><span>W4</span><span>W5</span><span>W6</span><span>W7</span><span>W8</span><span>W9</span>
+              </div>
+              
+              <div class="matrix-grid" id="matrix-grid" style="grid-template-columns: repeat(9, 1fr); gap:12px; margin-bottom:24px;">
+                <!-- Generated by JS -->
+              </div>
+              
+              <div class="matrix-legend" style="border-top:1px solid #F1F5F9; padding-top:16px;">
+                <span><div class="box green"></div> Present / Late</span>
+                <span><div class="box blue"></div> Leave</span>
+                <span><div class="box red"></div> Absent</span>
+                <span><div class="box gray"></div> No record</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Daily Shift Progress -->
+          <div class="bento-col">
+            <div class="card shift-progress" style="height:100%;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div class="sp-title">Daily Shift Progress</div>
+                <div class="pill blue-light" style="font-size:9px; padding:2px 8px;">From attendance record</div>
+              </div>
+              <div class="sp-sub" id="progress-sub">Shift progress is available after check-in.</div>
+              <div class="sp-time" id="progress-time">—</div>
+              
+              <div style="display:flex; justify-content:space-between; font-size:10px; font-weight:600; color:#64748B;">
+                <span><div class="box" style="background:#0B1830; display:inline-block; border-radius:50%; margin-right:4px;"></div></span>
+                <span id="progress-goal">Shift end</span>
+              </div>
+              <div class="sp-bar-track">
+                <div class="sp-bar-fill" id="progress-bar-fill" style="width: 10%;"></div>
+              </div>
+              
+              <div class="sp-stats-row">
+                <div class="sp-stat-box">
+                <div class="sp-stat-label">Scheduled end</div>
+                  <div class="sp-stat-val" id="progress-eod">—</div>
+                </div>
+                <div class="sp-stat-box">
+                  <div class="sp-stat-label">Remaining Time</div>
+                  <div class="sp-stat-val" id="progress-remaining">—</div>
+                </div>
+              </div>
+              
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:auto; font-size:10px; font-weight:600; color:#64748B;">
+                <span style="display:flex; align-items:center; gap:6px; color:#64748B;">Progress uses the assigned shift window.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ROW 3 -->
+        <div class="bento-row row-3">
+          <!-- Upcoming Shifts -->
+          <div class="bento-col">
+            <div class="card" style="height:100%;">
+              <div class="section-title-row">
+                <div>
+                  <h2 style="font-size:18px;">Upcoming Shift Roster</h2>
+                  <div style="font-size:11px; color:#64748B; margin-top:4px;">Scheduled dates from your shift roster</div>
+                </div>
+                <a href="shifts.html" style="color:#3B82F6; font-weight:600; text-decoration:none;">Full Month Schedule &rarr;</a>
+              </div>
+              <div class="shifts-list" id="upcoming-shifts">
+                <!-- Generated by JS -->
+              </div>
+            </div>
+          </div>
+          
+          <!-- Self-Service Hub -->
+          <div class="bento-col">
+            <div class="card" style="height:100%;">
+              <div class="section-title-row hub-heading">
+                <div>
+                  <h2>Self-Service Hub</h2>
+                  <p>Quick access to common employee tasks.</p>
+                </div>
+              </div>
+              <div class="hub-grid">
+                <a href="leave.html" class="hub-item" aria-label="Open leave management">
+                  <div class="hub-badge">LEAVE</div>
+                  <div class="hub-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 9h18M12 13v5M9.5 15.5h5"/></svg></div>
+                  <div class="hub-title">Leave management</div>
+                  <div class="hub-sub">Check balance or request time off</div>
+                </a>
+                <a href="shifts.html" class="hub-item" aria-label="Open shift schedule and swap options">
+                  <div class="hub-badge">SCHEDULE</div>
+                  <div class="hub-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 2l4 4-4 4M7 22l-4-4 4-4M21 6H9a4 4 0 0 0-4 4v1M3 18h12a4 4 0 0 0 4-4v-1"/></svg></div>
+                  <div class="hub-title">Shift schedule</div>
+                  <div class="hub-sub">Review shifts and swap options</div>
+                </a>
+                <a href="reports.html" class="hub-item" aria-label="Open reports">
+                  <div class="hub-badge">REPORTS</div>
+                  <div class="hub-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h8"/></svg></div>
+                  <div class="hub-title">Reports & exports</div>
+                  <div class="hub-sub">View and export work reports</div>
+                </a>
+                <a href="attendance.html" class="hub-item" aria-label="Open attendance">
+                  <div class="hub-badge">TIME LOG</div>
+                  <div class="hub-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+                  <div class="hub-title">Attendance history</div>
+                  <div class="hub-sub">Review check-ins and work hours</div>
+                </a>
+              </div>
+              
+            </div>
+          </div>
+        </div>
+
+      </main>
+
+    </div>
+  </div>
+
+  <!-- Bottom Nav Bar (Mobile only) -->
+  <nav class="bottom-nav mobile-only">
+    <a href="portal.html" class="nav-item active">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </a>
+    <a href="attendance.html" class="nav-item">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Check-In
+    </a>
+    <a href="leave.html" class="nav-item">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Calendar
+    </a>
+    <a href="profile.html" class="nav-item">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Profile
+    </a>
+  </nav>
+
+</div>
+
+<script src="../js/api.js"></script>
+<script src="../js/utils.js"></script>
+<script src="../js/components/toast.js"></script>
+<script src="../js/components/sidebar.js"></script>
+<script src="../js/components/notification-center.js"></script>
+<script src="../js/theme.js"></script>
+<script src="../js/portal-mobile.js?v=3"></script>
+</body>
+</html>

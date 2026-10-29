@@ -1,0 +1,5 @@
+# Single-service build is available (backend/Dockerfile). Full multi-container
+# orchestration (MySQL + Qdrant + backend + frontend) is a later improvement.
+# For now, run locally — see README.md.
+version: "3.9"
+services: {}

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Shifts · TrueShift</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script>
+  (function(){
+    try {
+      var s = localStorage.getItem('trueshift_theme_pref') || 'light';
+      var r = s === 'system' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : s;
+      document.documentElement.setAttribute('data-theme', r);
+    } catch(e){}
+  })();
+</script>
+<link rel="stylesheet" href="../css/main.css" />
+<link rel="stylesheet" href="../css/forms.css" />
+<link rel="stylesheet" href="../css/components.css" />
+<style>
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem; }
+  .shift-card { background: var(--color-surface); border-radius: var(--radius-md); padding: 1.5rem; border: 1px solid var(--color-border); position: relative; box-shadow: var(--shadow-sm); }
+  .shift-title { font-size: 1.15rem; font-weight: 700; margin-bottom: 1rem; color: var(--color-ink); }
+  .shift-stats { display: flex; flex-wrap: wrap; gap: 1rem; font-size: 0.85rem; color: var(--color-ink-soft); margin-bottom: 1rem; }
+  .shift-stat { display: flex; align-items: center; gap: 0.35rem; }
+  .time-track { height: 8px; background: var(--color-surface-alt); border-radius: 4px; margin: 1rem 0; position: relative; }
+  .time-bar { position: absolute; height: 100%; background: var(--color-primary); border-radius: 4px; }
+  .time-labels { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--color-ink-soft); }
+  .shift-actions { margin-top: 1.5rem; display: flex; gap: 0.5rem; }
+  .roster-grid { display: grid; grid-template-columns: 180px repeat(7, 1fr); border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; background: var(--color-surface); }
+  .roster-header { background: var(--color-surface-alt); font-weight: 600; font-size: 0.82rem; padding: 0.75rem; border-bottom: 1px solid var(--color-border); border-right: 1px solid var(--color-border); text-align: center; color: var(--color-ink); }
+  .roster-header:first-child { text-align: left; }
+  .roster-cell { padding: 0.75rem; border-bottom: 1px solid var(--color-border); border-right: 1px solid var(--color-border); font-size: 0.82rem; display:flex; flex-direction:column; gap:0.35rem; }
+  .roster-cell:last-child { border-right: none; }
+  .emp-chip { background: var(--color-surface-alt); border: 1px solid var(--color-border); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 4px; color: var(--color-ink); }
+  .swap-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 0.75rem; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-sm); }
+  .swap-info { font-size: 0.875rem; }
+  #shift-cards { grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr)); align-items:stretch; }
+  .shift-empty, .shift-error { grid-column:1/-1; display:flex; flex-direction:column; align-items:flex-start; gap:8px; padding:24px; background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-md); color:var(--color-ink-soft); }
+  .shift-empty strong, .shift-error strong { color:var(--color-ink); font-size:1rem; }
+  .shift-error span, .shift-data-note { overflow-wrap:anywhere; }
+  .shift-error { border-color:color-mix(in srgb, var(--color-danger) 35%, var(--color-border)); }
+  .shift-data-note { grid-column:1/-1; padding:12px 14px; border-radius:var(--radius-sm); background:var(--color-surface-alt); color:var(--color-ink-soft); font-size:.85rem; }
+  .roster-grid { min-width:850px; }
+  .roster-message { grid-column:1/-1; padding:20px; color:var(--color-ink-soft); }
+  @media (max-width:700px) {
+    .section-header { gap:12px; }
+    .section-header h2 { font-size:1.2rem; }
+    .swap-card { align-items:flex-start; flex-direction:column; gap:14px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+  <aside id="app-sidebar" class="sidebar"></aside>
+  <div class="main-area">
+    <header class="topbar">
+      <button class="hamburger-btn" id="hamburger-btn" onclick="document.getElementById('app-sidebar').classList.toggle('open')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <h1 class="topbar-title">Shifts</h1>
+      <div class="topbar-right">
+        <div class="theme-toggle-slot" data-theme-switcher></div>
+        <div class="notif-bell-wrapper" id="notif-bell-wrapper">
+          <button class="icon-btn" id="notif-bell-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span class="notif-badge hidden" id="notif-badge">0</span></button>
+        </div>
+        <div class="topbar-avatar" id="topbar-avatar">--</div>
+      </div>
+    </header>
+    <main class="page-content">
+      
+      <div class="section-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1.5rem;">
+        <h2 style="margin:0;">Shift Configurations</h2>
+        <button class="btn btn-primary" onclick="Modal.open('shift-modal')">Add Shift</button>
+      </div>
+
+      <div class="stat-grid" id="shift-cards">
+        <!-- populated by js -->
+      </div>
+
+      <div class="card" style="margin-bottom: 1.5rem; overflow-x: auto;">
+        <h3 class="section-title">Weekly Roster</h3>
+        <div class="roster-grid" id="roster-grid">
+          <!-- populated by js -->
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 class="section-title" style="display:flex; align-items:center; gap:0.5rem;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="color:var(--color-primary)"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          AI Shift-swap Recommendations
+        </h3>
+        <div id="swap-recs">
+          Loading recommendations...
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- Add Shift Modal -->
+<div id="shift-modal" class="modal-backdrop" onclick="Modal.closeOnBackdrop(event)">
+  <div class="modal" style="max-width:440px;" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-title">Add Shift</div>
+      <button class="modal-close" onclick="Modal.close('shift-modal')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <form id="add-shift-form">
+        <div class="form-group">
+          <label>Shift Name</label>
+          <input type="text" id="shift-name" class="form-control" placeholder="e.g. Morning Shift" required />
+        </div>
+        <div style="display:flex; gap:1rem;">
+          <div class="form-group" style="flex:1;">
+            <label>Start Time</label>
+            <input type="time" id="shift-start" class="form-control" required />
+          </div>
+          <div class="form-group" style="flex:1;">
+            <label>End Time</label>
+            <input type="time" id="shift-end" class="form-control" required />
+          </div>
+        </div>
+        <div style="display:flex; gap:1rem;">
+          <div class="form-group" style="flex:1;">
+            <label>Break (mins)</label>
+            <input type="number" id="shift-break" class="form-control" value="60" required />
+          </div>
+          <div class="form-group" style="flex:1;">
+            <label>Grace (mins)</label>
+            <input type="number" id="shift-grace" class="form-control" value="15" required />
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block" id="btn-save-shift">Create Shift</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="../js/api.js"></script>
+<script src="../js/utils.js"></script>
+<script src="../js/components/toast.js"></script>
+<script src="../js/components/modal.js"></script>
+<script src="../js/components/skeleton.js"></script>
+<script src="../js/components/sidebar.js"></script>
+<script src="../js/components/notification-center.js"></script>
+<script src="../js/theme.js"></script>
+<script src="../js/shifts.js"></script>
+</body>
+</html>
